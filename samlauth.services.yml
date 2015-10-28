@@ -1,8 +1,7 @@
 services:
   samlauth.saml:
     class: Drupal\samlauth\SamlService
-    factory_class: Drupal\samlauth\SamlService
-    factory_method: create
+    factory: Drupal\samlauth\SamlService::create
     arguments: [ "@service_container" ]
   samlauth.saml_user:
     class: Drupal\samlauth\SamlUserService
