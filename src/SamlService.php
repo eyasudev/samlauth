@@ -84,6 +84,7 @@ class SamlService implements ContainerInjectionInterface {
    *   The path to return the user to after a successful login.
    */
   public function logout($return_to = null) {
+    user_logout();
     $this->auth->logout($return_to, array('referrer' => $return_to));
   }
 
