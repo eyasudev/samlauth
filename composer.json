@@ -1,6 +1,6 @@
 {
   "name": "drupal/samlauth",
-  "type": "module",
+  "type": "drupal-module",
   "description": "Allows users to authenticate against an external SAML identity provider.",
   "keywords": ["Drupal"],
   "license": "GPL-2.0+",
