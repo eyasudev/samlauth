@@ -52,7 +52,19 @@ class SamlUserService {
    *   The uid of the matching user or NULL if we can't find one.
    */
   public function findUidByUniqueId($id) {
-    return $this->user_data->get('samlauth', NULL, 'saml_id', $id);
+    $return = $this->user_data->get('samlauth', NULL, 'saml_id', $id);
+    if (empty($return)) {
+      $return = NULL;
+    }
+    elseif (is_array($return)) {
+      if (count($return) === 1) {
+        $return = reset($return);
+      }
+      else {
+        throw new Exception('There are duplicates of the unique ID.');
+      }
+    }
+    return $return;
   }
 
   /**
