@@ -1,50 +1,59 @@
+# SAML Controller
 samlauth.saml_controller_login:
   path: '/saml/login'
   defaults:
     _controller: '\Drupal\samlauth\Controller\SamlController::login'
-    _title: 'SAML Login'
   requirements:
     _role: 'anonymous'
 samlauth.saml_controller_logout:
   path: '/saml/logout'
   defaults:
     _controller: '\Drupal\samlauth\Controller\SamlController::logout'
-    _title: 'SAML Logout'
   requirements:
     _role: 'authenticated'
 samlauth.saml_controller_metadata:
   path: '/saml/metadata'
   defaults:
+    _title: 'SAML 2.0 Metadata'
     _controller: '\Drupal\samlauth\Controller\SamlController::metadata'
-    _title: 'SAML Metadata'
   requirements:
-    _permission: 'view sp metadata'
+    _access: 'TRUE'
 samlauth.saml_controller_acs:
   path: '/saml/acs'
   defaults:
     _controller: '\Drupal\samlauth\Controller\SamlController::acs'
-    _title: 'SAML ACS'
   requirements:
+    method: POST
     _role: 'anonymous'
 samlauth.saml_controller_sls:
   path: '/saml/sls'
   defaults:
     _controller: '\Drupal\samlauth\Controller\SamlController::sls'
-    _title: 'SAML SLS'
   requirements:
+    method: POST
     _role: 'authenticated'
-samlauth.saml_controller_changepw:
-  path: '/saml/changepw'
-  defaults:
-    _controller: '\Drupal\samlauth\Controller\SamlController::changepw'
-    _title: 'SAML Change Password'
-  requirements:
-    _role: 'authenticated'
-samlauth.samlauth_configure_form:
-  path: '/admin/config/people/saml'
-  defaults:
-    _form: '\Drupal\samlauth\Form\SamlauthConfigureForm'
-    _title: 'SAML Authentication'
-  requirements:
-    _permission: 'configure saml'
 
+# SAML Configure
+samlauth.configure_form:
+  path: '/admin/config/services/saml'
+  defaults:
+    _title: 'SAML 2.0'
+    _form: '\Drupal\samlauth\Form\SamlAuthConfigureForm'
+  requirements:
+    _permission: 'administer saml authentication'
+
+# SAML User Settings
+samlauth.user_settings_form:
+  path: '/admin/config/services/saml/user'
+  defaults:
+    _title: 'User Settings'
+    _form: \Drupal\samlauth\Form\SamlAuthUserSettingsForm
+  requirements:
+    _permission: 'administer saml authentication'
+samlauth.user_mapping_form:
+  path: '/admin/config/people/samlauth/user/mapping'
+  defaults:
+    _title: 'User Mapping'
+    _form: \Drupal\samlauth\Form\SamlAuthUserMappingForm
+  requirements:
+    _permission: 'administer saml authentication'

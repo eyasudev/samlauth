@@ -1,0 +1,104 @@
+samlauth.configuration:
+  type: config_object
+  label: "SAML configuration"
+  mapping:
+    providers:
+      type: mapping
+      label: "SAML providers"
+      mapping:
+        sp:
+          type: mapping
+          label: "SAML service provider"
+          mapping:
+            entity_id:
+              type: string
+              label: "Service provider entity id"
+            name_id_format:
+              type: string
+              label: "Service provider name id format"
+            x509cert:
+              type: string
+              label: "Service provider certificate"
+            private_key:
+              type: string
+              label: "Service provider private key"
+        idp:
+          type: mapping
+          label: "Sam identity provider"
+          mapping:
+            entity_id:
+              type: uri
+              label: "Identity provider entity id URI"
+            single_sign_on_service:
+              type: uri
+              label: "Identity provider sign on service URI"
+            single_sign_out_service:
+              type: uri
+              label: "Identity provider sign out service URI"
+            x509cert:
+              type: string
+              label: "Service provider certificate"
+    advanced_settings:
+      type: mapping
+      label: "SAML advanced settings"
+      mapping:
+        security:
+          type: mapping
+          label: "SAML security setting"
+          mapping:
+            authn_requests_signed:
+              type: boolean
+              label: "Request signed"
+            want_messages_signed:
+              type: boolean
+              label: "Message signed"
+            want_name_id:
+              type: boolean
+              label: "Name ID signed"
+            requested_authn_context:
+              type: boolean
+              label: "Requested authn context"
+
+samlauth.user.settings:
+  type: config_object
+  label: "SAML user settings"
+  mapping:
+    user_mapping:
+      type: mapping
+      label: "User mapping"
+      mapping:
+        attributes:
+          type: string
+          label: "Mapping attributes"
+    route:
+      type: mapping
+      label: "Route"
+      mapping:
+        login:
+          type: string
+          label: "Login"
+        logout:
+          type: string
+          label: "Logout"
+
+samlauth.user.mapping:
+  type: config_object
+  label: "SAML user mapping"
+  mapping:
+    user_mapping:
+      type: mapping
+      label: "User Mapping"
+      mapping:
+        attribute:
+          type: string
+          label: "IPD attribute"
+    user_roles:
+      type: mapping
+      label: "User role"
+      mapping:
+        assigned_role:
+          type: sequence
+          label: "Assigned role"
+          sequence:
+            type: string
+            label: "Role name"

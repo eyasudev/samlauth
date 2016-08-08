@@ -1,6 +1,11 @@
-samlauth.samlauth_configure_form:
-  title: 'SAML Authentication'
-  parent: user.admin_index
-  description: 'Configure SAML authentication behaviors'
-  weight: -10
-  route_name: samlauth.samlauth_configure_form
+samlauth.configure_form:
+  title: 'SAML'
+  description: 'Configure SAML'
+  parent: system.admin_config_services
+  route_name: samlauth.configure_form
+
+samlauth.user_settings_form:
+  title: 'User'
+  description: 'Configure SAML User'
+  parent: samlauth.configure_form
+  route_name: samlauth.user_settings_form

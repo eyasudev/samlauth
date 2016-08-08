@@ -1,0 +1,17 @@
+providers:
+  sp:
+    entity_id: "/saml/metadata"
+    name_id_format: ""
+    x509cert: ""
+    private_key: ""
+  idp:
+    entity_id: ""
+    single_sign_on_service: ""
+    single_log_out_service: ""
+    x509cert: ""
+advanced_settings:
+  security:
+    authn_requests_signed: false
+    want_messages_signed: false
+    want_name_id: false
+    requested_authn_context: false

@@ -1,0 +1,5 @@
+user_mapping:
+  attributes: ""
+route:
+  login: "user.page"
+  logout: "<front>"

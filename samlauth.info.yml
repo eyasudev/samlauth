@@ -1,6 +1,8 @@
-name: "SAML Authentication"
 type: module
-description: "Allows users to authenticate against an external SAML identity provider."
+name: "SAML Authentication"
+description: "Provide a SAML authentication service for interacting with SAML IDP."
 core: 8.x
 package: "User authentication"
-configure: samlauth.samlauth_configure_form
+configure: samlauth.settings_form
+dependencies:
+  - externalauth

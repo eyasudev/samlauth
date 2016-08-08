@@ -1,8 +1,17 @@
 services:
-  samlauth.saml:
-    class: Drupal\samlauth\SamlService
-    factory: Drupal\samlauth\SamlService::create
-    arguments: [ "@service_container" ]
-  samlauth.saml_user:
-    class: Drupal\samlauth\SamlUserService
-    arguments: [ "@user.data", "@config.factory" ]
+  samlauth.service:
+    class: \Drupal\samlauth\SamlAuth
+    arguments: [ "@samlauth.settings", "@event_dispatcher" ]
+  samlauth.settings:
+    class: \Drupal\samlauth\SamlAuthSettings
+    arguments: [ "@config.factory", "@router.request_context" ]
+  samlauth.authentication_user:
+    class: \Drupal\samlauth\EventSubscriber\SamlAuthUserSubscriber
+    arguments: [ "@externalauth.externalauth", "@config.factory" ]
+    tags:
+      - { name: event_subscriber }
+  samlauth.sso_redirect_request:
+    class: \Drupal\samlauth\EventSubscriber\SamlAuthSsoRedirectRequest
+    arguments: [ "@samlauth.service" ]
+    tags:
+      - { name: event_subscriber }
