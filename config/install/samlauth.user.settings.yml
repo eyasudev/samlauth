@@ -3,3 +3,5 @@ user_mapping:
 route:
   login: "user.page"
   logout: "<front>"
+account:
+  username: "[user:display-name]"
