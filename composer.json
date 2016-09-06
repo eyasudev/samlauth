@@ -12,6 +12,6 @@
   },
   "require": {
     "onelogin/php-saml": "~2.5",
-    "drupal/externalauth": "^8.1.0"
+    "drupal/externalauth": "8.1.x-dev"
   }
 }
