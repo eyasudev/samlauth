@@ -2,7 +2,7 @@
 
 namespace Drupal\samlauth\EventSubscriber;
 
-use Drupal\samlauth\SamlAuthInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
@@ -12,22 +12,7 @@ use Symfony\Component\HttpKernel\KernelEvents;
  */
 class SamlAuthSsoRedirectRequest implements EventSubscriberInterface {
 
-  /**
-   * SAML Authentication.
-   *
-   * @var \Drupal\samlauth\SamlAuthInterface
-   */
-  protected $samlAuth;
-
-  /**
-   * Constructor for \Drupal\samlauth\EventSubscriber\SamlAuthSsoRedirectRequest.
-   *
-   * @param SamlAuthInterface $saml_auth
-   *   An SAML authentication object.
-   */
-  public function __construct(SamlAuthInterface $saml_auth) {
-    $this->samlAuth = $saml_auth;
-  }
+  use ContainerAwareTrait;
 
   /**
    * {@inheritdoc}
@@ -49,7 +34,9 @@ class SamlAuthSsoRedirectRequest implements EventSubscriberInterface {
 
     if ($request->query->has('_checkSSO')) {
       if (TRUE === $request->query->getBoolean('_checkSSO')) {
-        $event->setResponse($this->samlAuth->login()->send());
+        $event->setResponse(
+          $this->container->get('samlauth.service')->login()->send()
+        );
       }
     }
   }
