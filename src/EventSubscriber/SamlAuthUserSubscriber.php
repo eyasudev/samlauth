@@ -138,20 +138,24 @@ class SamlAuthUserSubscriber implements EventSubscriberInterface {
    */
   protected function buildUserDataFromAttributes(SamlAuthInterface $saml_auth) {
     $user_data = [];
-    $attributes = $saml_auth->getAttributes();
+    $user_mappings = $this->userMapping->get('user_mapping');
 
-    // Iterate over the user mapping values and build the user data array.
-    foreach ($this->userMapping->get('user_mapping') as $field_name => $mapping) {
-      if (!isset($mapping['attribute'])) {
-        continue;
+    if (!empty($user_mappings)) {
+      $attributes = $saml_auth->getAttributes();
+
+      // Iterate over the user mapping values and build the user data array.
+      foreach ($user_mappings as $field_name => $mapping) {
+        if (!isset($mapping['attribute'])) {
+          continue;
+        }
+        $attribute = $mapping['attribute'];
+
+        if (!isset($attributes[$attribute]) || empty($attributes[$attribute])) {
+          continue;
+        }
+
+        $user_data[$field_name] = $attributes[$attribute];
       }
-      $attribute = $mapping['attribute'];
-
-      if (!isset($attributes[$attribute]) || empty($attributes[$attribute])) {
-        continue;
-      }
-
-      $user_data[$field_name] = $attributes[$attribute];
     }
 
     return $user_data;
