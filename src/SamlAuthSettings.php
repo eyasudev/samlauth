@@ -58,8 +58,8 @@ class SamlAuthSettings {
           'url' => $this->getSingleLogoutServiceUrl(),
         ),
         'NameIDFormat' => $config->get('providers.sp.name_id_format'),
-        'x509cert' => \OneLogin_Saml2_Utils::formatCert($config->get('providers.sp.x509cert')),
-        'privateKey' => \OneLogin_Saml2_Utils::formatPrivateKey($config->get('providers.sp.private_key')),
+        'x509cert' => $config->get('providers.sp.x509cert'),
+        'privateKey' => $config->get('providers.sp.private_key'),
       ],
       'idp' => array(
         'entityId' => $config->get('providers.idp.entity_id'),
@@ -69,7 +69,7 @@ class SamlAuthSettings {
         'singleLogoutService' => array(
           'url' => $config->get('providers.idp.single_log_out_service'),
         ),
-        'x509cert' => \OneLogin_Saml2_Utils::formatCert($config->get('providers.idp.x509cert')),
+        'x509cert' => $config->get('providers.idp.x509cert'),
       ),
       'security' => array(
         'wantNameId' => $config->get('advanced_settings.security.want_name_id'),
