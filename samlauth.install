@@ -1,0 +1,17 @@
+<?php
+
+/*
+ * @file
+ * The installation implementations for the samlauth module.
+ */
+
+use Drupal\system\Entity\Menu;
+
+/**
+ * Implements hook_uninstall().
+ */
+function samlauth_uninstall() {
+  if ($samlauth_account_menu = Menu::load('samlauth-account')) {
+    $samlauth_account_menu->delete();
+  }
+}
