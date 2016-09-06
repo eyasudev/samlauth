@@ -91,6 +91,30 @@ class SamlAuthUserSettingsForm extends ConfigFormBase {
       '#default_value' => $config->get('route.logout'),
       '#required' => TRUE,
     ];
+    $form['account'] = [
+      '#type' => 'fieldset',
+      '#title' => $this->t('Account'),
+      '#tree' => TRUE,
+    ];
+    $form['account']['username'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Username'),
+      '#description' => $this->t('Override the account username that is
+        displayed using tokens.'),
+      '#default_value' => $config->get('account.username'),
+      '#required' => TRUE,
+    ];
+
+    // Add support for the token UI module if it's enabled.
+    if (\Drupal::moduleHandler()->moduleExists('token')) {
+      $form['account']['username']['#default_value'] = $this->allowedTokenTypes();
+      $form['account']['username']['#element_validate'] = ['token_element_validate'];
+
+      $form['account']['token_replacements'] = [
+        '#theme' => 'token_tree_link',
+        '#token_types' => $this->allowedTokenTypes(),
+      ];
+    }
 
     return parent::buildForm($form, $form_state);
   }
@@ -139,6 +163,16 @@ class SamlAuthUserSettingsForm extends ConfigFormBase {
       ->save();
 
     parent::submitForm($form, $form_state);
+  }
+
+  /**
+   * Define the allowed token replacement types.
+   *
+   * @return array
+   *   An array of allowed token types.
+   */
+  protected function allowedTokenTypes() {
+    return ['samlauth-account', 'user'];
   }
 
   /**

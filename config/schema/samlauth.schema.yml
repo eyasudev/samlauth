@@ -80,6 +80,13 @@ samlauth.user.settings:
         logout:
           type: string
           label: "Logout"
+    account:
+      type: mapping
+      label: "Account"
+      mapping:
+        username:
+          type: string
+          label: "Username"
 
 samlauth.user.mapping:
   type: config_object
