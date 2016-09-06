@@ -107,7 +107,7 @@ class SamlAuthUserSettingsForm extends ConfigFormBase {
 
     // Add support for the token UI module if it's enabled.
     if (\Drupal::moduleHandler()->moduleExists('token')) {
-      $form['account']['username']['#default_value'] = $this->allowedTokenTypes();
+      $form['account']['username']['#token_types'] = $this->allowedTokenTypes();
       $form['account']['username']['#element_validate'] = ['token_element_validate'];
 
       $form['account']['token_replacements'] = [
