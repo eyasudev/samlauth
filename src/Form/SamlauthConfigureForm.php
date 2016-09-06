@@ -86,12 +86,14 @@ class SamlAuthConfigureForm extends ConfigFormBase {
       '#title' => $this->t('Single Sign On Service'),
       '#description' => $this->t('A endpoint where the SP will send the SSO request.'),
       '#default_value' => $config->get('providers.idp.single_sign_on_service'),
+      '#required' => TRUE,
     ];
     $form['providers']['idp']['single_log_out_service'] = [
       '#type' => 'url',
       '#title' => $this->t('Single Log Out Service'),
       '#description' => $this->t('A endpoint where the SP will send the SLO request.'),
       '#default_value' => $config->get('providers.idp.single_log_out_service'),
+      '#required' => TRUE,
     ];
     $form['providers']['idp']['x509cert'] = array(
       '#type' => 'textarea',
