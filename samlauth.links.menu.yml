@@ -1,3 +1,13 @@
+samlauth.account:
+  weight: -10
+  route_name: user.page
+  menu_name: samlauth-account
+  class: \Drupal\samlauth\Plugin\Menu\SamlAuthAccountMenuLink
+
+samlauth.account.logout:
+  menu_name: samlauth-account
+  class: \Drupal\samlauth\Plugin\Menu\SamlAuthLoginLogoutMenuLink
+
 samlauth.configure_form:
   title: 'SAML'
   description: 'Configure SAML'

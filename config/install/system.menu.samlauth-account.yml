@@ -1,0 +1,7 @@
+langcode: en
+status: true
+dependencies: {  }
+id: samlauth-account
+label: 'SAML account menu'
+description: 'Links related to the active SAML authenticated user.'
+locked: false
