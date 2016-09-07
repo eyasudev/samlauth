@@ -55,6 +55,7 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
     $this->accountProxy = $account_proxy;
     $this->externalAuth = $external_auth;
     $this->externalAuthMap = $external_authmap;
+    $this->userMapping = $config->get('samlauth.user.mapping');
     $this->userSettings = $config->get('samlauth.user.settings');
   }
 
@@ -77,6 +78,46 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
    */
   public function isAuthenticated() {
     return (boolean) $this->getAccount()->isAuthenticated();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function loginRegister($authname, array $attributes = []) {
+    $user_data = $this->buildUserDataFromAttributes($attributes);
+    $account = $this->externalAuth->loginRegister($authname, 'samlauth', $user_data, $attributes);
+
+    if ($assigned_role = $this->userMapping->get('user_roles.assigned_role')) {
+
+      foreach (array_keys(array_filter($assigned_role)) as $role_id) {
+        if ($account->hasRole($role_id)) {
+          continue;
+        }
+        $account->addRole($role_id);
+      }
+
+      $account->save();
+    }
+
+    return $this;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function logout() {
+    user_logout();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function redirectRoute($type) {
+    if ($type !== 'login' || $type !== 'logout') {
+      return '<front>';
+    }
+
+    return $this->userSettings->get("route.$type");
   }
 
   /**
@@ -158,4 +199,36 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
     return $this->externalAuth->load($this->initialEmail(), 'samlauth');
   }
 
+  /**
+   * Build account data based on SAML assertion attributes.
+   *
+   * @param array $attributes
+   *   An array of SAML assertion attributes.
+   *
+   * @return array
+   *   An array of user data with the respected attribute data.
+   */
+  protected function buildUserDataFromAttributes(array $attributes) {
+    if (empty($attributes)) {
+      return [];
+    }
+    $user_data = [];
+
+    if ($user_mappings = $this->userMapping->get('user_mapping')) {
+      foreach ($user_mappings as $field_name => $mapping) {
+        if (!isset($mapping['attribute'])) {
+          continue;
+        }
+        $attribute = $mapping['attribute'];
+
+        if (!isset($attributes[$attribute]) || empty($attributes[$attribute])) {
+          continue;
+        }
+
+        $user_data[$field_name] = $attributes[$attribute];
+      }
+    }
+
+    return $user_data;
+  }
 }

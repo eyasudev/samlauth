@@ -10,7 +10,7 @@ services:
     arguments: [ "@current_user", "@externalauth.externalauth", "@externalauth.authmap", "@config.factory", "@token" ]
   samlauth.authentication_user:
     class: \Drupal\samlauth\EventSubscriber\SamlAuthUserSubscriber
-    arguments: [ "@externalauth.externalauth", "@config.factory" ]
+    arguments: [ "@samlauth.account" ]
     tags:
       - { name: event_subscriber }
   samlauth.sso_redirect_request:

@@ -48,4 +48,33 @@ interface SamlAuthAccountInterface {
    */
   public function getAuthData();
 
+  /**
+   * Logout external authenticated user from Drupal.
+   */
+  public function logout();
+
+  /**
+   * Login and/or register external authenticated user with Drupal.
+   *
+   * @param string $authname
+   *   The unique, external authentication name provided by authentication
+   *   provider.
+   * @param array $attributes
+   *   An array of SAML attributes that were returned from the IdP.
+   *
+   * @return self
+   */
+  public function loginRegister($authname, array $attributes = []);
+
+  /**
+   * Get redirect route name based on type.
+   *
+   * @param string $type
+   *   The redirect type, either login or logout.
+   *
+   * @return string
+   *   A route name based on given type.
+   */
+  public function redirectRoute($type);
+
 }

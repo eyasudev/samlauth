@@ -2,11 +2,9 @@
 
 namespace Drupal\samlauth\EventSubscriber;
 
-use Drupal\Core\Config\ConfigFactoryInterface;
-use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\samlauth\Event\SamlAuthEvents;
 use Drupal\samlauth\Event\SamlAuthProcessResponse;
-use Drupal\samlauth\SamlAuthInterface;
+use Drupal\samlauth\SamlAuthAccountInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
@@ -15,38 +13,20 @@ use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 class SamlAuthUserSubscriber implements EventSubscriberInterface {
 
   /**
-   * External Authentication.
+   * SAML authentication account.
    *
-   * @var \Drupal\externalauth\ExternalAuthInterface
+   * @var \Drupal\samlauth\SamlAuthAccountInterface
    */
-  protected $externalAuth;
-
-  /**
-   * SAML user mapping.
-   *
-   * @var \Drupal\Core\Config\ImmutableConfig
-   */
-  protected $userMapping;
-
-  /**
-   * SAML user settings.
-   *
-   * @var \Drupal\Core\Config\ImmutableConfig
-   */
-  protected $userSettings;
+  protected $samlAuthAccount;
 
   /**
    * Constructor for \Drupal\samlauth\EventSubscriber\SamlAuthUserSubscriber.
    *
-   * @param \Drupal\externalauth\ExternalAuthInterface $external_auth
-   *   An external authentication service.
-   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
-   *   An configuration factory.
+   * @param \Drupal\samlauth\SamlAuthAccountInterface $saml_auth_account
+   *   An SAML authentication account object.
    */
-  public function __construct(ExternalAuthInterface $external_auth, ConfigFactoryInterface $config) {
-    $this->externalAuth = $external_auth;
-    $this->userMapping = $config->get('samlauth.user.mapping');
-    $this->userSettings = $config->get('samlauth.user.settings');
+  public function __construct(SamlAuthAccountInterface $saml_auth_account) {
+    $this->samlAuthAccount = $saml_auth_account;
   }
 
   /**
@@ -66,25 +46,10 @@ class SamlAuthUserSubscriber implements EventSubscriberInterface {
    *   An event subscriber object.
    */
   public function onProcessAcsResponse(SamlAuthProcessResponse $event) {
-    $saml_auth = $event->getSamlAuth();
-    $user_data = $this->buildUserDataFromAttributes($saml_auth);
-
-    // Login or register the SAML user into Drupal.
-    $account = $this->externalAuth->loginRegister(
-      $saml_auth->getNameId(), 'samlauth', $user_data, $saml_auth->getAttributes()
+    $this->samlAuthAccount->loginRegister(
+      $event->getSamlAuth()->getNameId(),
+      $event->getSamlAuth()->getAttributes()
     );
-
-    // Assign roles to the SAML Drupal user account.
-    if ($assigned_role = $this->userMapping->get('user_roles.assigned_role')) {
-      foreach (array_keys(array_filter($assigned_role)) as $role_id) {
-        if ($account->hasRole($role_id)) {
-          continue;
-        }
-        $account->addRole($role_id);
-      }
-
-      $account->save();
-    }
 
     $this->setRedirectState($event, 'login');
   }
@@ -96,7 +61,7 @@ class SamlAuthUserSubscriber implements EventSubscriberInterface {
    *   An event subscriber object.
    */
   public function onProcessSlsResponse(SamlAuthProcessResponse $event) {
-    user_logout();
+    $this->samlAuthAccount->logout();
 
     $this->setRedirectState($event, 'logout');
   }
@@ -121,44 +86,9 @@ class SamlAuthUserSubscriber implements EventSubscriberInterface {
       $event->setRedirectUrlFromUri($relay_state_uri);
     }
     else {
-      $event->setRedirectUrlFromRoute($this->userSettings->get("route.$type"));
+      $event->setRedirectUrlFromRoute($this->samlAuthAccount->redirectRoute($type));
     }
 
     return $this;
   }
-
-  /**
-   * Build user data based on SAML assertion attributes.
-   *
-   * @param \Drupal\samlauth\SamlAuthInterface $saml_auth
-   *   A SAML authentication object.
-   *
-   * @return array
-   *   An array of user data with the respected attribute data.
-   */
-  protected function buildUserDataFromAttributes(SamlAuthInterface $saml_auth) {
-    $user_data = [];
-    $user_mappings = $this->userMapping->get('user_mapping');
-
-    if (!empty($user_mappings)) {
-      $attributes = $saml_auth->getAttributes();
-
-      // Iterate over the user mapping values and build the user data array.
-      foreach ($user_mappings as $field_name => $mapping) {
-        if (!isset($mapping['attribute'])) {
-          continue;
-        }
-        $attribute = $mapping['attribute'];
-
-        if (!isset($attributes[$attribute]) || empty($attributes[$attribute])) {
-          continue;
-        }
-
-        $user_data[$field_name] = $attributes[$attribute];
-      }
-    }
-
-    return $user_data;
-  }
-
 }
