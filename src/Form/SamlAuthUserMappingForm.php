@@ -70,6 +70,7 @@ class SamlAuthUserMappingForm extends ConfigFormBase {
       '#header' => [
         'field_name' => $this->t('Field Name'),
         'attributes' => $this->t('IPD Attributes'),
+        'settings' => $this->t('Settings'),
       ],
       '#empty' => $this->t('Currently there are no user mapping properties.'),
     ];
@@ -85,6 +86,20 @@ class SamlAuthUserMappingForm extends ConfigFormBase {
         '#options' => $attribute_options,
         '#empty_option' => $this->t('- None -'),
         '#default_value' => $config->get("user_mapping.$field_name.attribute"),
+      ];
+      $form['user_mapping'][$field_name]['settings'] = [
+        '#type' => 'container',
+        '#tree' => TRUE,
+        '#states' => [
+          'visible' => [
+            ':input[name="user_mapping[' . $field_name . '][attribute]"]' => ['!value' => ''],
+          ],
+        ],
+      ];
+      $form['user_mapping'][$field_name]['settings']['use_account_linking'] = [
+        '#type' => 'checkbox',
+        '#title' => $this->t('Use when linking accounts'),
+        '#default_value' => $config->get("user_mapping.$field_name.settings.use_account_linking"),
       ];
     }
     $form['user_roles'] = [
