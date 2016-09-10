@@ -116,6 +116,25 @@ class SamlAuthUserSettingsForm extends ConfigFormBase {
       ];
     }
 
+    $form['account']['linking'] = [
+      '#type' => 'details',
+      '#title' => $this->t('Linking'),
+      '#description' => $this->t('Attempt to link an existing Drupal user based
+        on SAML assertion attributes.'),
+      '#tree' => TRUE,
+    ];
+    $form['account']['linking']['conjunction'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Conjunction'),
+      '#description' => $this->t('Select the conjunction to use when more then
+        one attribute is selected.'),
+      '#options' => [
+        'OR' => $this->t('OR'),
+        'AND' => $this->t('AND'),
+      ],
+      '#default_value' => $config->get('account.linking.conjunction'),
+    ];
+
     return parent::buildForm($form, $form_state);
   }
 
