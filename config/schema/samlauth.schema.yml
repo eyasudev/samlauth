@@ -87,6 +87,13 @@ samlauth.user.settings:
         username:
           type: string
           label: "Username"
+        linking:
+          type: mapping
+          label: "Account linking"
+          mapping:
+            conjunction:
+              type: string
+              label: "Linking conjunction"
 
 samlauth.user.mapping:
   type: config_object
@@ -99,6 +106,13 @@ samlauth.user.mapping:
         attribute:
           type: string
           label: "IPD attribute"
+        settings:
+          type: mapping
+          label: "User mapping settings"
+          mapping:
+            use_account_linking:
+              type: boolean
+              label: "Use account linking"
     user_roles:
       type: mapping
       label: "User role"
