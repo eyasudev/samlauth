@@ -8,6 +8,38 @@ namespace Drupal\samlauth;
 interface SamlAuthAccountInterface {
 
   /**
+   * User account identifier.
+   *
+   * @return int
+   *   A unique user account id.
+   */
+  public function id();
+
+  /**
+   * Get external authentication name.
+   *
+   * @return string|bool
+   *   An external authentication name; otherwise FALSE.
+   */
+  public function authname();
+
+  /**
+   * Get user account authentication data.
+   *
+   * @return array
+   *   An array of account authentication data.
+   */
+  public function getAuthData();
+
+  /**
+   * User account username.
+   *
+   * @return string
+   *   A SAML authentication user name.
+   */
+  public function getUsername();
+
+  /**
    * Check if the user account is external.
    *
    * @return bool
@@ -22,31 +54,6 @@ interface SamlAuthAccountInterface {
    *   TRUE if the user is authenticated; otherwise FALSE.
    */
   public function isAuthenticated();
-
-  /**
-   * User account initial email address.
-   *
-   * @return string
-   *   A string representing a unique account identifier, most commonly this is
-   *   an email address a user initially registered.
-   */
-  public function initialEmail();
-
-  /**
-   * User account username.
-   *
-   * @return string
-   *   A SAML authentication user name.
-   */
-  public function getUsername();
-
-  /**
-   * Get user account authentication data.
-   *
-   * @return array
-   *   An array of account authentication data.
-   */
-  public function getAuthData();
 
   /**
    * Logout external authenticated user from Drupal.
