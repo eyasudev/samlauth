@@ -402,13 +402,9 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
     );
   }
 
-  /*
+  /**
    * Save authentication map data.
    *
-   * @param \Drupal\user\UserInterface $account
-   *   An user account object.
-   * @param string $authname
-   *   The external authentication name.
    * @param array $authmap_data
    *   An array of authentication map data.
    */
