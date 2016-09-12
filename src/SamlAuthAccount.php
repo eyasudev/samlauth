@@ -4,12 +4,12 @@ namespace Drupal\samlauth;
 
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Entity\EntityStorageException;
-use Drupal\Core\Entity\Query\QueryFactory;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Session\AccountProxyInterface;
+use Drupal\Core\Utility\Token;
 use Drupal\externalauth\AuthmapInterface;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\samlauth\Exception\SamlAuthAccountStorageExecption;
-use Drupal\token\TokenInterface;
 use Drupal\user\Entity\User;
 
 /**
@@ -20,7 +20,7 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
   /**
    * Token object.
    *
-   * @var \Drupal\token\TokenInterface
+   * @var \Drupal\Core\Utility\Token
    */
   protected $token;
 
@@ -46,26 +46,34 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
   protected $externalAuthMap;
 
   /**
-   * Entity query.
+   * Entity type manager.
    *
-   * @var \Drupal\Core\Entity\Query\QueryFactory
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $entityQuery;
+  protected $entityTypeManager;
 
   /**
    * Constructor for \Drupal\samlauth\SamlAuthAccount.
    *
    * @param \Drupal\Core\Session\AccountProxyInterface $account_proxy
-   *   An account proxy object.
+   *   A account proxy object.
    * @param \Drupal\externalauth\ExternalAuthInterface $external_auth
-   *   An external authentication object.
+   *   A external authentication object.
+   * @param \Drupal\externalauth\AuthmapInterface $external_authmap
+   *   A external authmap object.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config
+   *   A configuration factory.
+   * @param \Drupal\Core\Utility\Token $token
+   *   A token object.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
+   *   A entity type manager object.
    */
-  public function __construct(AccountProxyInterface $account_proxy, ExternalAuthInterface $external_auth, AuthmapInterface $external_authmap, ConfigFactoryInterface $config, TokenInterface $token, QueryFactory $entity_query) {
+  public function __construct(AccountProxyInterface $account_proxy, ExternalAuthInterface $external_auth, AuthmapInterface $external_authmap, ConfigFactoryInterface $config, Token $token, EntityTypeManagerInterface $entity_type_manager) {
     $this->token = $token;
-    $this->entityQuery = $entity_query;
     $this->accountProxy = $account_proxy;
     $this->externalAuth = $external_auth;
     $this->externalAuthMap = $external_authmap;
+    $this->entityTypeManager = $entity_type_manager;
     $this->userMapping = $config->get('samlauth.user.mapping');
     $this->userSettings = $config->get('samlauth.user.settings');
   }
@@ -97,16 +105,16 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
       ->externalAuthMap
       ->getAuthData($this->id(), 'samlauth');
 
-    if (!isset($records['data']) || empty($records['data'])) {
+    if (empty($records['data'])) {
       return [];
     }
-    $authmap_data = unserialize($records['data']);
+    $data = unserialize($records['data']);
 
-    if (!is_array($authmap_data)) {
+    if (FALSE === $data || !is_array($data)) {
       return [];
     }
 
-    return $authmap_data;
+    return $data;
   }
 
   /**
@@ -120,7 +128,7 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
     $token = $this->userSettings->get('account.username');
     $username = $this->token->replace($token, $data, ['clear' => TRUE]);
 
-    return !empty($username) ? $username : $this->getAccount()->getDisplayName();
+    return $username ?: $this->getAccount()->getDisplayName();
   }
 
   /**
@@ -209,7 +217,22 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
    *   A user account object.
    */
   protected function loadUser() {
-    return User::load($this->accountProxy->id());
+    return $this->entityTypeManager->getStorage('user')->load($this->id());
+  }
+
+  /**
+   * Query user account object.
+   *
+   * @param string $conjunction
+   *   (optional) The logical operator for the query, either:
+   *   - AND: all of the conditions on the query need to match.
+   *   - OR: at least one of the conditions on the query need to match.
+   *
+   * @return \Drupal\Core\Entity\Query\QueryInterface
+   *   The query object.
+   */
+  protected function queryUser($conjunction) {
+    return $this->entityTypeManager->getStorage('user')->getQuery($conjunction);
   }
 
   /**
@@ -313,7 +336,7 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
 
     // Add conditions to the user query only if the property is defined to use
     // account linking.
-    $user_query = $this->entityQuery->get('user', $conjunction);
+    $user_query = $this->queryUser($conjunction);
 
     foreach ($this->userMapping() as $field_name => $mapping) {
       if (TRUE == $mapping['settings']['use_account_linking']) {

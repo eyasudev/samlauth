@@ -7,7 +7,7 @@ services:
     arguments: [ "@config.factory", "@router.request_context" ]
   samlauth.account:
     class: \Drupal\samlauth\SamlAuthAccount
-    arguments: [ "@current_user", "@externalauth.externalauth", "@externalauth.authmap", "@config.factory", "@token", "@entity.query" ]
+    arguments: [ "@current_user", "@externalauth.externalauth", "@externalauth.authmap", "@config.factory", "@token", "@entity_type.manager" ]
   samlauth.authentication_user:
     class: \Drupal\samlauth\EventSubscriber\SamlAuthUserSubscriber
     arguments: [ "@samlauth.account" ]
