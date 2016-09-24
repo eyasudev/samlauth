@@ -227,7 +227,7 @@ class SamlAuthUserSettingsForm extends ConfigFormBase {
     $attribute_in_use = [];
 
     foreach ($this->config('samlauth.user.mapping')->get('user_mapping') as $field_name => $mapping) {
-      if (!isset($mapping['attribute'])) {
+      if (!isset($mapping['attribute']) || empty($mapping['attribute'])) {
         continue;
       }
       $attribute = $mapping['attribute'];
