@@ -1,5 +1,6 @@
 providers:
   sp:
+    entity_id_type: "url"
     entity_id: "/saml/metadata"
     name_id_format: ""
     x509cert: ""

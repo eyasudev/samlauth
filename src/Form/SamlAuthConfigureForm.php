@@ -2,6 +2,8 @@
 
 namespace Drupal\samlauth\Form;
 
+use Drupal\Component\Utility\NestedArray;
+use Drupal\Component\Utility\UrlHelper;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Url;
@@ -23,11 +25,12 @@ class SamlAuthConfigureForm extends ConfigFormBase {
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('samlauth.configuration');
-    $metadata_uri = Url::fromRoute('samlauth.saml_controller_metadata')->toString();
 
     $form['providers'] = [
       '#type' => 'fieldset',
       '#title' => $this->t('Providers'),
+      '#prefix' => '<div id="samlauth-providers">',
+      '#suffix' => '</div>',
       '#tree' => TRUE,
     ];
 
@@ -40,14 +43,51 @@ class SamlAuthConfigureForm extends ConfigFormBase {
       '#open' => TRUE,
       '#tree' => TRUE,
     ];
-    $form['providers']['sp']['entity_id'] = [
-      '#type' => 'textfield',
-      '#title' => $this->t('Entity ID'),
-      '#default_value' => $config->get('providers.sp.entity_id', $metadata_uri),
+    $entity_type_parents = ['providers', 'sp', 'entity_id_type'];
+
+    $entity_id_type = $form_state->hasValue($entity_type_parents)
+      ? $form_state->getValue($entity_type_parents)
+      : $config->get(implode('.', $entity_type_parents), 'url');
+
+    $form['providers']['sp']['entity_id_type'] = [
+      '#type' => 'select',
+      '#title' => $this->t('Entity ID Type'),
+      '#options' => $this->getEntityIdTypeOptions(),
       '#required' => TRUE,
-      '#size' => 25,
-      '#field_prefix' => $GLOBALS['base_url'],
+      '#ajax' => [
+        'event' => 'change',
+        'wrapper' => 'samlauth-providers',
+        'callback' => '::ajaxProviderCallback',
+      ],
+      '#default_value' => $entity_id_type,
     ];
+
+    if (!is_null($entity_id_type)) {
+      $form['providers']['sp']['entity_id'] = [
+        '#type' => 'textfield',
+        '#title' => $this->t('Entity ID'),
+        '#description' => $this->t('Specify a unique entity ID using a custom
+          naming convention.'),
+        '#default_value' => $config->get('providers.sp.entity_id'),
+        '#required' => TRUE,
+      ];
+
+      if ($entity_id_type === 'url') {
+        $form['providers']['sp']['entity_id'] += [
+          '#size' => 25,
+          '#field_prefix' => $GLOBALS['base_url'],
+        ];
+
+        $form['providers']['sp']['entity_id']['#default_value'] = $config->get(
+          'providers.sp.entity_id',
+          Url::fromRoute('samlauth.saml_controller_metadata')->toString()
+        );
+
+        $form['providers']['sp']['entity_id']['#description'] = $this->t('Specify
+          a unique entity ID using a URL containing its own domain name.');
+      }
+    }
+
     $form['providers']['sp']['name_id_format'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Name ID Format'),
@@ -140,6 +180,25 @@ class SamlAuthConfigureForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
+    $sp_parents = ['providers', 'sp'];
+
+    if ($entity_id_type = $form_state->getValue(array_merge($sp_parents, ['entity_id_type']))) {
+
+      // Validate the entity ID when the URL type has been selected.
+      if ($entity_id_type === 'url') {
+        $entity_id_parents = array_merge($sp_parents, ['entity_id']);
+        $entity_id_value = $form_state->getValue($entity_id_parents);
+
+        if (!UrlHelper::isValid($GLOBALS['base_url'] . $entity_id_value, TRUE)) {
+          $element = NestedArray::getValue($form, $entity_id_parents);
+
+          $form_state->setError(
+            $element,
+            $this->t('@title URL is invalid.', ['@title' => $element['#title']])
+          );
+        }
+      }
+    }
     parent::validateForm($form, $form_state);
     // @TODO: Validate cert. Might be able to just openssl_x509_parse().
   }
@@ -156,11 +215,39 @@ class SamlAuthConfigureForm extends ConfigFormBase {
   }
 
   /**
+   * Ajax provider callback.
+   *
+   * @param array $form
+   *   An array of form elements.
+   * @param \Drupal\Core\Form\FormStateInterface $form_state
+   *   The form state object.
+   *
+   * @return array
+   *   The form elements to return.
+   */
+  public function ajaxProviderCallback(array $form, FormStateInterface $form_state) {
+    return $form['providers'];
+  }
+
+  /**
    * {@inheritdoc}
    */
   protected function getEditableConfigNames() {
     return [
       'samlauth.configuration',
+    ];
+  }
+
+  /**
+   * Define entity id type options.
+   *
+   * @return array
+   *   An array of entity id type options.
+   */
+  protected function getEntityIdTypeOptions() {
+    return [
+      'url' => $this->t('URL'),
+      'custom' => $this->t('Custom'),
     ];
   }
 

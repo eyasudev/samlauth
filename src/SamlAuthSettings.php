@@ -50,7 +50,7 @@ class SamlAuthSettings {
 
     return [
       'sp' => [
-        'entityId' => $this->getServiceProviderMetadataUrl(),
+        'entityId' => $this->getServiceProviderEntityId(),
         'assertionConsumerService' => [
           'url' => $this->getAssertionConsumerServiceUrl(),
         ],
@@ -81,13 +81,19 @@ class SamlAuthSettings {
   }
 
   /**
-   * Get SAML service provider metadata URL.
+   * Get SAML service provider entity ID.
    *
    * @return string
-   *   An absolute URL to the service provider metadata endpoint.
+   *   An absolute URL to the service provider metadata endpoint; otherwise a
+   *   custom name.
    */
-  protected function getServiceProviderMetadataUrl() {
-    return $this->context->getCompleteBaseUrl() . $this->config->get('providers.sp.entity_id');
+  protected function getServiceProviderEntityId() {
+    $entity_id = $this->config->get('providers.sp.entity_id');
+    $entity_id_type = $this->config->get('providers.sp.entity_id_type');
+
+    return $entity_id_type === 'url'
+      ? $this->context->getCompleteBaseUrl() . $entity_id
+      : $entity_id;
   }
 
   /**

@@ -10,6 +10,9 @@ samlauth.configuration:
           type: mapping
           label: "SAML service provider"
           mapping:
+            entity_id_type:
+              type: string
+              label: "Service provider entity id type"
             entity_id:
               type: string
               label: "Service provider entity id"
