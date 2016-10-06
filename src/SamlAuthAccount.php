@@ -393,12 +393,12 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
     $user_mapping = [];
 
     if ($user_mappings = $this->userMapping->get('user_mapping')) {
-      foreach ($user_mappings as $field_name => $values) {
-        if (!isset($values['attribute'])) {
+      foreach ($user_mappings as $field_name => $mapping) {
+        if (empty($mapping['attribute'])) {
           continue;
         }
 
-        $user_mapping[$field_name] = $values;
+        $user_mapping[$field_name] = $mapping;
       }
     }
 
