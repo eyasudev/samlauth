@@ -339,9 +339,13 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
     $user_query = $this->queryUser($conjunction);
 
     foreach ($this->userMapping() as $field_name => $mapping) {
-      if (TRUE == $mapping['settings']['use_account_linking']) {
-        $user_query->condition($field_name, $attributes[$mapping['attribute']]);
+      if (!isset($attributes[$mapping['attribute']])
+        || !$mapping['settings']['use_account_linking']) {
+        continue;
       }
+
+      $user_query
+        ->condition($field_name, $attributes[$mapping['attribute']]);
     }
     $results = $user_query->execute();
 
