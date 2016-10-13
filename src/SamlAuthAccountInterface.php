@@ -84,4 +84,20 @@ interface SamlAuthAccountInterface {
    */
   public function redirectRoute($type);
 
+  /**
+   * Get account session index.
+   *
+   * @return string
+   *   The SAML session index.
+   */
+  public function getSessionIndex();
+
+  /**
+   * Get account session expiration.
+   *
+   * @return string
+   *   The SAML session expiration date.
+   */
+  public function getSessionExpiration();
+
 }

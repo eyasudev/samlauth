@@ -11,6 +11,7 @@ use Drupal\externalauth\AuthmapInterface;
 use Drupal\externalauth\ExternalAuthInterface;
 use Drupal\samlauth\Exception\SamlAuthAccountStorageExecption;
 use Drupal\user\Entity\User;
+use Drupal\user\PrivateTempStoreFactory;
 
 /**
  * Class \Drupal\samlauth\SamlAuthAccount.
@@ -46,6 +47,13 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
   protected $externalAuthMap;
 
   /**
+   * Private account session store.
+   *
+   * @var \Drupal\user\PrivateTempStore.
+   */
+  protected $privateTempStore;
+
+  /**
    * Entity type manager.
    *
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -67,8 +75,18 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
    *   A token object.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entity_type_manager
    *   A entity type manager object.
+   * @param \Drupal\user\PrivateTempStoreFactory $temp_store_factory
+   *   A temp data store factory object.
    */
-  public function __construct(AccountProxyInterface $account_proxy, ExternalAuthInterface $external_auth, AuthmapInterface $external_authmap, ConfigFactoryInterface $config, Token $token, EntityTypeManagerInterface $entity_type_manager) {
+  public function __construct(
+    AccountProxyInterface $account_proxy,
+    ExternalAuthInterface $external_auth,
+    AuthmapInterface $external_authmap,
+    ConfigFactoryInterface $config,
+    Token $token,
+    EntityTypeManagerInterface $entity_type_manager,
+    PrivateTempStoreFactory $temp_store_factory) {
+
     $this->token = $token;
     $this->accountProxy = $account_proxy;
     $this->externalAuth = $external_auth;
@@ -76,6 +94,7 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
     $this->entityTypeManager = $entity_type_manager;
     $this->userMapping = $config->get('samlauth.user.mapping');
     $this->userSettings = $config->get('samlauth.user.settings');
+    $this->privateTempStore = $temp_store_factory->get('samlauth');
   }
 
   /**
@@ -149,6 +168,7 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
    * {@inheritdoc}
    */
   public function logout() {
+    $this->deleteSessionData();
     user_logout();
   }
 
@@ -185,6 +205,65 @@ class SamlAuthAccount implements SamlAuthAccountInterface {
     }
 
     return $this->userSettings->get("route.$type");
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSessionIndex() {
+    $session_index = $this->privateTempStore->get('session_index');
+
+    return isset($session_index) ? $session_index : NULL;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSessionExpiration() {
+    $session_expiration = $this->privateTempStore->get('session_expiration');
+
+    return isset($session_expiration) ? $session_expiration : NULL;
+  }
+
+  /**
+   * Set account session index.
+   *
+   * @param string $index
+   *   The SAML session index.
+   */
+  public function setSessionIndex($index) {
+    if (isset($index)) {
+      $this->privateTempStore->set('session_index', $index);
+    }
+
+    return $this;
+  }
+
+  /**
+   * Set account session expiration.
+   *
+   * @param string $expiration
+   *   The SAML session expiration date.
+   */
+  public function setSessionExpiration($expiration) {
+    if (isset($expiration)) {
+      $this->privateTempStore->set('session_expiration', $expiration);
+    }
+
+    return $this;
+  }
+
+  /**
+   * Delete private stored session information.
+   */
+  protected function deleteSessionData() {
+    $keys = ['session_index', 'session_expiration'];
+
+    foreach ($keys as $key) {
+      $this->privateTempStore->delete($key);
+    }
+
+    return $this;
   }
 
   /**
