@@ -46,10 +46,12 @@ class SamlAuthUserSubscriber implements EventSubscriberInterface {
    *   An event subscriber object.
    */
   public function onProcessAcsResponse(SamlAuthProcessResponse $event) {
-    $this->samlAuthAccount->loginRegister(
-      $event->getSamlAuth()->getNameId(),
-      $event->getSamlAuth()->getAttributes()
-    );
+    $auth = $event->getSamlAuth();
+
+    $this->samlAuthAccount
+      ->loginRegister($auth->getNameId(), $auth->getAttributes())
+      ->setSessionIndex($auth->getSessionIndex())
+      ->setSessionExpiration($auth->getSessionExpiration());
 
     $this->setRedirectState($event, 'login');
   }
@@ -91,4 +93,5 @@ class SamlAuthUserSubscriber implements EventSubscriberInterface {
 
     return $this;
   }
+
 }
