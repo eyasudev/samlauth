@@ -1,13 +1,13 @@
 services:
   samlauth.service:
     class: \Drupal\samlauth\SamlAuth
-    arguments: [ "@samlauth.settings", "@event_dispatcher" ]
+    arguments: [ "@samlauth.settings", "@event_dispatcher", "@samlauth.account" ]
   samlauth.settings:
     class: \Drupal\samlauth\SamlAuthSettings
     arguments: [ "@config.factory", "@router.request_context" ]
   samlauth.account:
     class: \Drupal\samlauth\SamlAuthAccount
-    arguments: [ "@current_user", "@externalauth.externalauth", "@externalauth.authmap", "@config.factory", "@token", "@entity_type.manager" ]
+    arguments: [ "@current_user", "@externalauth.externalauth", "@externalauth.authmap", "@config.factory", "@token", "@entity_type.manager", "@user.private_tempstore"]
   samlauth.authentication_user:
     class: \Drupal\samlauth\EventSubscriber\SamlAuthUserSubscriber
     arguments: [ "@samlauth.account" ]
