@@ -28,14 +28,26 @@ class SamlAuth implements SamlAuthInterface {
   protected $eventDispatcher;
 
   /**
+   * SAML authentication account.
+   *
+   * @var \Drupal\samlauth\SamlAuthAccountInterface
+   */
+  protected $samlAuthAccount;
+
+  /**
    * Constructor for \Drupal\samlauth\SamlAuthService.
    *
    * @param \Drupal\samlauth\SamlAuthSettings $settings
    *   The SAML authentication settings.
    */
-  public function __construct(SamlAuthSettings $settings, EventDispatcherInterface $event_dispatcher) {
+  public function __construct(
+    SamlAuthSettings $settings,
+    EventDispatcherInterface $event_dispatcher,
+    SamlAuthAccountInterface $saml_auth_account) {
+
     $this->auth = new \OneLogin_Saml2_Auth($settings->formatted());
     $this->eventDispatcher = $event_dispatcher;
+    $this->samlAuthAccount = $saml_auth_account;
   }
 
   /**
@@ -51,8 +63,10 @@ class SamlAuth implements SamlAuthInterface {
    * {@inheritdoc}
    */
   public function logout($return_to = NULL) {
+    $session_index = $this->samlAuthAccount->getSessionIndex();
+
     return new TrustedRedirectResponse(
-      $this->auth->logout($return_to, [], FALSE, FALSE, TRUE)
+      $this->auth->logout($return_to, [], NULL, $session_index, TRUE)
     );
   }
 
@@ -133,6 +147,20 @@ class SamlAuth implements SamlAuthInterface {
    */
   public function isAuthenticated() {
     return $this->auth->isAuthenticated();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSessionIndex() {
+    return $this->auth->getSessionIndex();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getSessionExpiration() {
+    return $this->auth->getSessionExpiration();
   }
 
   /**
