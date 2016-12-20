@@ -10,8 +10,13 @@
     "issues": "http://drupal.org/project/samlauth",
     "source": "http://cgit.drupalcode.org/samlauth"
   },
+  "repositories": {
+  "drupal": {
+    "type": "composer",
+    "url": "https://packages.drupal.org/8"
+  },
   "require": {
     "onelogin/php-saml": "~2.5",
-    "drupal/externalauth": "8.1.x-dev"
+    "drupal/externalauth": "1.x-dev"
   }
 }
