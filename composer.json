@@ -11,9 +11,10 @@
     "source": "http://cgit.drupalcode.org/samlauth"
   },
   "repositories": {
-  "drupal": {
-    "type": "composer",
-    "url": "https://packages.drupal.org/8"
+    "drupal": {
+      "type": "composer",
+      "url": "https://packages.drupal.org/8"
+    },
   },
   "require": {
     "onelogin/php-saml": "~2.5",
